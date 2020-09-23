@@ -1,5 +1,5 @@
 # esp8266UptimeRobot
-Program for the esp, that calls the UptimeRobot api.
+Program for the esp, that calls the UptimeRobot api, and checks if a server is down.
 
 Components required:
 - 1 x 5110 lcd display
