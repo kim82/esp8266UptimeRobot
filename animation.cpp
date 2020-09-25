@@ -51,6 +51,10 @@ void Animation::setOfflineMode() {
 void Animation::setAlertMode() {
   currentStatus = ALERT;
 }
+void Animation::setUpdating() {
+  currentStatus = UPDATING;
+  showImage(updating);
+}
 
 void Animation::run() {
   switch (currentStatus) {

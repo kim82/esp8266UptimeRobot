@@ -1,6 +1,7 @@
 #include "button.h"
 #include "wifi.h"
 #include "animation.h"
+#include "firmware.h"
 #include <arduino-timer.h>
 
 #define LED1_PIN      2   //D4
@@ -14,6 +15,8 @@ Wifi      wifi;
 
 void setup() {
   Serial.begin(115200);
+  Firmware::printVersion();
+  
   //setup leds
   pinMode(LED1_PIN, OUTPUT);
   pinMode(LED2_PIN, OUTPUT);
@@ -56,12 +59,17 @@ void loop() {
   timer.tick();
 
   boolean beginReset = false;
+  boolean beginUpdate = false;
   switch(checkButton()) {
     case 1: //button clicked
       wifi.totalDownCount = 0;
       break;
     case 2: //button released after 5 sec or more
       wifi.resetAll();
+      break;
+    case 3:
+      ledOn();
+      Firmware::checkAndUpdate();
       break;
       
     case 20: //button held down more than 5 sec
@@ -72,11 +80,15 @@ void loop() {
       break;
 
     case 30:
-      beginReset = false;
+      beginUpdate = true;
       break;
   }
-
-  if (!beginReset) {
+  
+  if (beginUpdate) {
+    ledBlink();
+    animation.setUpdating();
+  }
+  else if (!beginReset) {
     if (wifi.totalDownCount > 0) {
       ledBlink();
       animation.setAlertMode();

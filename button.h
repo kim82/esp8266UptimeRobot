@@ -23,14 +23,17 @@ void setupButton() {
 
 void handleShortPress() {
   Serial.println("short");
+  button.counter = 0;
 }
  
 void handleLongPress() {
   Serial.println("long");
+  button.counter = 0;
 }
 
 void handleReallyLongPress() {
   Serial.println("really long");
+  button.counter = 0;
 }
 
 byte checkButton() {
@@ -41,13 +44,15 @@ byte checkButton() {
   // check the button
   button.currentState = digitalRead(button.pin);
 
-  //button is held down more than 5 sec and less then 10 sec
-  if (button.currentState == PRESSED && pressedTime >= longPress && pressedTime < reallyLongPress) {
-    ret = 20;
-  }
-  //button is held down more than 10 sec
-  if (button.currentState == PRESSED && pressedTime >= reallyLongPress) {
-    ret = 30;
+  if (button.counter != 0) {
+    //button is held down more than 5 sec and less then 10 sec
+    if (button.currentState == PRESSED && pressedTime >= longPress && pressedTime < reallyLongPress) {
+      ret = 20;
+    }
+    //button is held down more than 10 sec
+    if (button.currentState == PRESSED && pressedTime >= reallyLongPress) {
+      ret = 30;
+    }
   }
   
   // has it changed?

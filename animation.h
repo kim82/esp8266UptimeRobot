@@ -12,9 +12,10 @@
     #define LCD_C       LOW
     #define LCD_D       HIGH
     
-    #define OFFLINE 0
-    #define NORMAL  1
-    #define ALERT   2
+    #define OFFLINE   0
+    #define NORMAL    1
+    #define ALERT     2
+    #define UPDATING  3
     #define UNDEFINED 5
     
     private:
@@ -33,6 +34,7 @@
       void setAlertMode();
       void setOfflineMode();
       void setNormalMode();
+      void setUpdating();
       void run();
   };
 #endif
