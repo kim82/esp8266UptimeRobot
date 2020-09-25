@@ -8,7 +8,7 @@
   class Firmware {   
     #define FW_VERSION 3
     
-    #define FWUrlBase "https://github.com/kim82/esp8266UptimeRobot/raw/master/firmware/"
+    #define FWUrlBase "https://raw.githubusercontent.com/kim82/esp8266UptimeRobot/master/firmware/"
     #define FWVersionFile "esp8266UptimeRobot.version"
     
     #define FWFile "esp8266UptimeRobot_"
