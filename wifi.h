@@ -14,7 +14,7 @@
     private:
       void readFromEeprom();
       void writeToEeprom(const char *api_key, const char *interval);
-      
+      void failedConnection();
     public:
       typedef struct
       {
@@ -25,6 +25,7 @@
     
       WMSettings settings;
       int totalDownCount;
+      int connectionFailCount = 0;
       
       Wifi();
       void setup();

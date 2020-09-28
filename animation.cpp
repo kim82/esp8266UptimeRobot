@@ -55,6 +55,14 @@ void Animation::setUpdating() {
   currentStatus = UPDATING;
   showImage(updating);
 }
+void Animation::setNoConnection() {
+  showImage(noConnection);
+}
+void Animation::setNoUpdates() {
+  showImage(noUpdates);
+  nextBlink = 1;  //refresh immediately after
+  delay(2000);
+}
 
 void Animation::run() {
   switch (currentStatus) {

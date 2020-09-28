@@ -35,6 +35,8 @@
       void setOfflineMode();
       void setNormalMode();
       void setUpdating();
+      void setNoConnection();
+      void setNoUpdates();
       void run();
   };
 #endif

@@ -30,6 +30,12 @@ void Wifi::setup() {
   Serial.println(settings.interval);
 }
 
+void Wifi::failedConnection() {
+  Serial.println("Failed connection");
+  if (connectionFailCount < 100)
+      connectionFailCount++;
+}
+
 bool Wifi::checkUptimeRobot() {
   const int API_TIMEOUT = 15000;  //keep it long if you want to receive headers from client
   Serial.print("Connecting..");
@@ -45,6 +51,7 @@ bool Wifi::checkUptimeRobot() {
   }
   Serial.println();
   if(!client.connected()) {
+    failedConnection();
     Serial.println("Failed to connect, going back to sleep");
     client.stop();
     return true;
@@ -66,23 +73,33 @@ bool Wifi::checkUptimeRobot() {
     delay(100);
   }
   if(!client.available()) {
+    failedConnection();
     Serial.println("No response, going back to sleep");
     client.stop();
+
     return true;
   }
   
   while(client.available()){
     String line = client.readStringUntil('\n');
-    int a = line.indexOf("\"total\":");
-    if (a > -1) {
-      int b = line.indexOf("}", a);
-
-      String total = line.substring(a + 8, b);
-      totalDownCount = total.toInt();
-      Serial.print("TOTAL DOWN: ");
-      Serial.println(totalDownCount);
+    int OK = line.indexOf("\"stat\":\"ok\"");
+    if (OK > -1) {
+      connectionFailCount = 0;
       
-      break;  //stops the reading
+      int a = line.indexOf("\"total\":"); //looks for the total:xx entry in the json
+      if (a > -1) {
+        int b = line.indexOf("}", a);
+  
+        String total = line.substring(a + 8, b);
+        totalDownCount = total.toInt();
+        Serial.print("TOTAL DOWN: ");
+        Serial.println(totalDownCount);
+        
+        break;  //stops the reading
+      }
+    }
+    else {
+      failedConnection();
     }
   }
   Serial.println("closing connection");
@@ -111,12 +128,14 @@ void Wifi::readFromEeprom() {
 }
 
 void Wifi::writeToEeprom(const char *api_key, const char *interval) {
-  strcpy(settings.api_key, api_key);
-  settings.ver = EEPROM_VERSION;
-  settings.interval = atoi(interval);
-  
-  EEPROM.begin(512);
-  EEPROM.put(0, settings);
-  EEPROM.commit();
-  EEPROM.end();
+  if (strlen(api_key) != 0) {
+    strcpy(settings.api_key, api_key);
+    settings.ver = EEPROM_VERSION;
+    settings.interval = atoi(interval);
+    
+    EEPROM.begin(512);
+    EEPROM.put(0, settings);
+    EEPROM.commit();
+    EEPROM.end();
+  }
 }

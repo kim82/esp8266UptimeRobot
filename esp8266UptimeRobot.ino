@@ -8,6 +8,7 @@
 #define LED2_PIN      16  //D0
 boolean ledStatus;
 
+boolean pauseAlert = false;
 auto timer = timer_create_default();
 
 Animation animation;
@@ -34,8 +35,14 @@ void setup() {
   timer.every(1000 * 60 * wifi.settings.interval, checkUptimeRobot_timerHdl);  //every x minutes
   checkUptimeRobot_timerHdl(0);
 }
+
 bool checkUptimeRobot_timerHdl(void *) {
-  wifi.checkUptimeRobot();
+  if (!pauseAlert) {
+    wifi.checkUptimeRobot();
+  }
+}
+bool resumeCheck_timerHdl(void *) {
+  pauseAlert = false;
 }
 
 void ledBlink() {
@@ -63,13 +70,23 @@ void loop() {
   switch(checkButton()) {
     case 1: //button clicked
       wifi.totalDownCount = 0;
+      if (!pauseAlert) {
+        pauseAlert = true;
+        timer.in(1000 * 60 * 5, resumeCheck_timerHdl);  //resume check after 5 minutes
+      }
       break;
+    
     case 2: //button released after 5 sec or more
       wifi.resetAll();
       break;
+      
     case 3:
       ledOn();
-      Firmware::checkAndUpdate();
+      animation.setUpdating();
+      
+      if (!Firmware::checkAndUpdate()) {
+        animation.setNoUpdates();
+      }
       break;
       
     case 20: //button held down more than 5 sec
@@ -83,19 +100,23 @@ void loop() {
       beginUpdate = true;
       break;
   }
-  
-  if (beginUpdate) {
-    ledBlink();
-    animation.setUpdating();
+
+  if (wifi.connectionFailCount >= 10) {
+    animation.setNoConnection();
   }
-  else if (!beginReset) {
-    if (wifi.totalDownCount > 0) {
+  else {
+    if (beginUpdate) {
       ledBlink();
-      animation.setAlertMode();
     }
-    else {
-      ledOff();
-      animation.setNormalMode();
+    else if (!beginReset) {
+      if (wifi.totalDownCount > 0) {
+        ledBlink();
+        animation.setAlertMode();
+      }
+      else {
+        ledOff();
+        animation.setNormalMode();
+      }
     }
   }
   animation.run();
